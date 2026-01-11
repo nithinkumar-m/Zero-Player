@@ -1,13 +1,12 @@
-package com.zeroplayer.presentation.player
+package com.zeroplayer.presentation.playerhost
 
 import android.app.Activity
-import android.net.Uri
 import android.content.pm.ActivityInfo
 import android.view.ViewGroup
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -19,8 +18,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
@@ -30,60 +29,44 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.media3.common.MediaItem
-import androidx.media3.common.Player
-import androidx.media3.common.VideoSize
-import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 import com.zeroplayer.R
+import kotlinx.coroutines.delay
 
 @Composable
-fun PlayerScreen(
+fun PlayerHostRoot(
     uriString: String,
     onBack: () -> Unit,
     onEnterPip: () -> Unit,
-    viewModel: PlayerViewModel = hiltViewModel(),
+    viewModel: PlayerHostViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
     val activity = context as? Activity
-    val uri = remember(uriString) { Uri.parse(uriString) }
+    val playbackState by viewModel.playback.state.collectAsStateWithLifecycle()
     val settings by viewModel.settings.collectAsStateWithLifecycle()
 
-    val player = remember(uriString) {
-        ExoPlayer.Builder(context).build().apply {
-            setMediaItem(MediaItem.fromUri(uri))
-            prepare()
-            playWhenReady = true
-        }
+    LaunchedEffect(uriString) {
+        viewModel.start(uriString)
     }
 
-    DisposableEffect(player, activity) {
-        val listener = object : Player.Listener {
-            override fun onVideoSizeChanged(videoSize: VideoSize) {
-                val w = videoSize.width
-                val h = videoSize.height
-                if (w <= 0 || h <= 0) return
-
-                // Requirement:
-                // - If the video is landscape (including 16:9), lock landscape.
-                // - If the video is portrait, lock portrait.
-                activity?.requestedOrientation =
-                    if (w >= h) ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
-                    else ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT
-            }
+    // Lock orientation based on video aspect ratio.
+    DisposableEffect(activity, playbackState.videoWidth, playbackState.videoHeight) {
+        val w = playbackState.videoWidth
+        val h = playbackState.videoHeight
+        if (activity != null && w > 0 && h > 0) {
+            activity.requestedOrientation =
+                if (w >= h) ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+                else ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT
         }
-        player.addListener(listener)
         onDispose {
-            player.removeListener(listener)
             activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
-            player.release()
         }
     }
 
     val seekToast = remember { mutableStateOf<String?>(null) }
     LaunchedEffect(seekToast.value) {
         if (seekToast.value != null) {
-            kotlinx.coroutines.delay(650)
+            delay(650)
             seekToast.value = null
         }
     }
@@ -100,8 +83,7 @@ fun PlayerScreen(
                             val seekMs = settings.doubleTapSeekMs
                             val isLeft = offset.x < (widthPx / 2f)
                             val delta = if (isLeft) -seekMs else seekMs
-                            val target = (player.currentPosition + delta).coerceAtLeast(0L)
-                            player.seekTo(target)
+                            viewModel.seekBy(delta)
                             seekToast.value = if (isLeft) "-${seekMs / 1000}s" else "+${seekMs / 1000}s"
                         },
                     )
@@ -115,16 +97,13 @@ fun PlayerScreen(
                             ViewGroup.LayoutParams.MATCH_PARENT,
                             ViewGroup.LayoutParams.MATCH_PARENT,
                         )
-                        this.player = player
+                        player = viewModel.playback.player
                         useController = true
                     }
                 },
-                update = { view ->
-                    view.player = player
-                },
+                update = { it.player = viewModel.playback.player },
             )
 
-            // Tiny on-screen feedback for double-tap seek.
             val toast = seekToast.value
             if (toast != null) {
                 Card(
@@ -140,7 +119,6 @@ fun PlayerScreen(
                 }
             }
 
-            // Minimal overlay actions.
             Row(
                 modifier = Modifier
                     .align(Alignment.TopStart)
