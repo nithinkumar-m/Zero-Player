@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Settings
@@ -42,6 +41,7 @@ import com.zeroplayer.player.PlayerActivity
 import com.zeroplayer.presentation.folder.FolderVideosScreen
 import com.zeroplayer.presentation.folders.FoldersScreen
 import com.zeroplayer.presentation.settings.SettingsScreen
+import androidx.compose.material3.ExperimentalMaterial3Api
 
 object Routes {
     const val Folders = "folders"
@@ -51,6 +51,7 @@ object Routes {
     const val ArgFolderName = "folderName"
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ZeroPlayerAppRoot(
 ) {
@@ -179,4 +180,3 @@ private fun PermissionGate(
         }
     }
 }
-

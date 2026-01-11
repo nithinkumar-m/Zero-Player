@@ -7,7 +7,6 @@ class RefreshDeviceVideosUseCase @Inject constructor(
     private val videoRepository: VideoRepository,
 ) {
     suspend operator fun invoke() {
-        videoRepository.refreshDeviceVideos()
+        videoRepository.scanDeviceVideos()
     }
 }
-
