@@ -5,5 +5,8 @@
     <string name="permission_needed_body">To list and play local videos, allow access to your media.</string>
     <string name="grant_permission">Grant permission</string>
     <string name="enter_pip">PiP</string>
+    <string name="settings_title">Settings</string>
+    <string name="settings_double_tap_seek">Double-tap seek</string>
+    <string name="settings_enable_animations">Enable animations</string>
 </resources>
 

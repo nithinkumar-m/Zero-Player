@@ -7,8 +7,16 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -16,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -23,6 +32,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavType
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -31,11 +41,13 @@ import com.zeroplayer.R
 import com.zeroplayer.presentation.folder.FolderVideosScreen
 import com.zeroplayer.presentation.folders.FoldersScreen
 import com.zeroplayer.presentation.player.PlayerScreen
+import com.zeroplayer.presentation.settings.SettingsScreen
 
 object Routes {
     const val Folders = "folders"
     const val FolderVideos = "folderVideos"
     const val Player = "player"
+    const val Settings = "settings"
     const val ArgUri = "uri"
     const val ArgBucketId = "bucketId"
     const val ArgFolderName = "folderName"
@@ -47,6 +59,8 @@ fun ZeroPlayerAppRoot(
 ) {
     val navController = rememberNavController()
     val context = LocalContext.current
+    val backStackEntry by navController.currentBackStackEntryAsState()
+    val route = backStackEntry?.destination?.route.orEmpty()
 
     val requiredPermission = remember {
         if (Build.VERSION.SDK_INT >= 33) Manifest.permission.READ_MEDIA_VIDEO
@@ -77,45 +91,85 @@ fun ZeroPlayerAppRoot(
         return
     }
 
-    NavHost(
-        navController = navController,
-        startDestination = Routes.Folders,
-    ) {
-        composable(Routes.Folders) {
-            FoldersScreen(
-                onOpenFolder = { bucketId, folderName ->
-                    navController.navigate(
-                        "${Routes.FolderVideos}/$bucketId/${android.net.Uri.encode(folderName)}",
-                    )
-                },
-            )
-        }
+    Scaffold(
+        topBar = {
+            // Hide top bar on full-screen player for now.
+            val showTopBar = !route.startsWith(Routes.Player)
+            if (showTopBar) {
+                val canGoBack = navController.previousBackStackEntry != null &&
+                    (route.startsWith(Routes.FolderVideos) || route == Routes.Settings)
 
-        composable(
-            route = "${Routes.FolderVideos}/{${Routes.ArgBucketId}}/{${Routes.ArgFolderName}}",
-            arguments = listOf(
-                navArgument(Routes.ArgBucketId) { type = NavType.StringType },
-                navArgument(Routes.ArgFolderName) { type = NavType.StringType },
-            ),
+                val title = when {
+                    route == Routes.Settings -> stringResource(id = R.string.settings_title)
+                    route.startsWith(Routes.FolderVideos) -> "Videos"
+                    else -> "Folders"
+                }
+
+                CenterAlignedTopAppBar(
+                    title = { Text(text = title) },
+                    navigationIcon = {
+                        if (canGoBack) {
+                            IconButton(onClick = { navController.popBackStack() }) {
+                                Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back")
+                            }
+                        }
+                    },
+                    actions = {
+                        if (route == Routes.Folders) {
+                            IconButton(onClick = { navController.navigate(Routes.Settings) }) {
+                                Icon(imageVector = Icons.Default.Settings, contentDescription = "Settings")
+                            }
+                        }
+                    },
+                )
+            }
+        },
+    ) { innerPadding ->
+        NavHost(
+            navController = navController,
+            startDestination = Routes.Folders,
+            modifier = Modifier.padding(innerPadding),
         ) {
-            FolderVideosScreen(
-                onBack = { navController.popBackStack() },
-                onOpenPlayer = { uriString ->
-                    navController.navigate("${Routes.Player}/${android.net.Uri.encode(uriString)}")
-                },
-            )
-        }
+            composable(Routes.Folders) {
+                FoldersScreen(
+                    onOpenFolder = { bucketId, folderName ->
+                        navController.navigate(
+                            "${Routes.FolderVideos}/$bucketId/${android.net.Uri.encode(folderName)}",
+                        )
+                    },
+                )
+            }
 
-        composable(
-            route = "${Routes.Player}/{${Routes.ArgUri}}",
-            arguments = listOf(navArgument(Routes.ArgUri) { type = NavType.StringType }),
-        ) { backStackEntry ->
-            val uriString = backStackEntry.arguments?.getString(Routes.ArgUri).orEmpty()
-            PlayerScreen(
-                uriString = android.net.Uri.decode(uriString),
-                onBack = { navController.popBackStack() },
-                onEnterPip = onEnterPip,
-            )
+            composable(Routes.Settings) {
+                SettingsScreen()
+            }
+
+            composable(
+                route = "${Routes.FolderVideos}/{${Routes.ArgBucketId}}/{${Routes.ArgFolderName}}",
+                arguments = listOf(
+                    navArgument(Routes.ArgBucketId) { type = NavType.StringType },
+                    navArgument(Routes.ArgFolderName) { type = NavType.StringType },
+                ),
+            ) {
+                FolderVideosScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpenPlayer = { uriString ->
+                        navController.navigate("${Routes.Player}/${android.net.Uri.encode(uriString)}")
+                    },
+                )
+            }
+
+            composable(
+                route = "${Routes.Player}/{${Routes.ArgUri}}",
+                arguments = listOf(navArgument(Routes.ArgUri) { type = NavType.StringType }),
+            ) { backStackEntry ->
+                val uriString = backStackEntry.arguments?.getString(Routes.ArgUri).orEmpty()
+                PlayerScreen(
+                    uriString = android.net.Uri.decode(uriString),
+                    onBack = { navController.popBackStack() },
+                    onEnterPip = onEnterPip,
+                )
+            }
         }
     }
 }

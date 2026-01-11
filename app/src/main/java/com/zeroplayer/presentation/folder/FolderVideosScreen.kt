@@ -17,7 +17,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,6 +24,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zeroplayer.domain.model.Video
 import java.util.concurrent.TimeUnit
 
@@ -34,7 +34,7 @@ fun FolderVideosScreen(
     onOpenPlayer: (uriString: String) -> Unit,
     viewModel: FolderVideosViewModel = hiltViewModel(),
 ) {
-    val state by viewModel.uiState.collectAsState()
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
@@ -65,12 +65,17 @@ fun FolderVideosScreen(
                 CircularProgressIndicator()
             }
         } else {
-            AnimatedVisibility(visible = true, enter = fadeIn()) {
+            AnimatedVisibility(visible = true, enter = if (state.enableAnimations) fadeIn() else fadeIn(initialAlpha = 1f)) {
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    items(state.videos, key = { it.id }) { video ->
+                    items(
+                        items = state.videos,
+                        key = { it.id },
+                        contentType = { "video" },
+                    ) { video ->
                         VideoRow(
                             video = video,
                             onClick = { onOpenPlayer(video.uriString) },
+                            enableAnimations = state.enableAnimations,
                         )
                     }
                 }
@@ -83,11 +88,12 @@ fun FolderVideosScreen(
 private fun VideoRow(
     video: Video,
     onClick: () -> Unit,
+    enableAnimations: Boolean,
 ) {
     val context = LocalContext.current
     Row(
         modifier = Modifier
-            .animateItemPlacementCompat()
+            .then(if (enableAnimations) Modifier.animateItemPlacementCompat() else Modifier)
             .fillMaxWidth()
             .clickable(onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 12.dp),
