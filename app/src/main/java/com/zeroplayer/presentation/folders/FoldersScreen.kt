@@ -17,13 +17,13 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zeroplayer.domain.model.VideoFolder
 
 @Composable
@@ -31,7 +31,7 @@ fun FoldersScreen(
     onOpenFolder: (bucketId: Long, folderName: String) -> Unit,
     viewModel: FoldersViewModel = hiltViewModel(),
 ) {
-    val state by viewModel.uiState.collectAsState()
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     Column(modifier = Modifier.fillMaxSize()) {
         Text(
@@ -51,14 +51,19 @@ fun FoldersScreen(
         } else {
             AnimatedVisibility(
                 visible = true,
-                enter = fadeIn(),
-                exit = fadeOut(),
+                enter = if (state.enableAnimations) fadeIn() else fadeIn(initialAlpha = 1f),
+                exit = if (state.enableAnimations) fadeOut() else fadeOut(targetAlpha = 0f),
             ) {
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    items(state.folders, key = { it.bucketId }) { folder ->
+                    items(
+                        items = state.folders,
+                        key = { it.bucketId },
+                        contentType = { "folder" },
+                    ) { folder ->
                         FolderRow(
                             folder = folder,
                             onClick = { onOpenFolder(folder.bucketId, folder.name) },
+                            enableAnimations = state.enableAnimations,
                         )
                     }
                 }
@@ -71,10 +76,11 @@ fun FoldersScreen(
 private fun FolderRow(
     folder: VideoFolder,
     onClick: () -> Unit,
+    enableAnimations: Boolean,
 ) {
     Row(
         modifier = Modifier
-            .animateItemPlacementCompat()
+            .then(if (enableAnimations) Modifier.animateItemPlacementCompat() else Modifier)
             .fillMaxWidth()
             .clickable(onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 12.dp),

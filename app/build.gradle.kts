@@ -70,7 +70,11 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview")
     debugImplementation("androidx.compose.ui:ui-tooling")
     implementation("androidx.compose.material3:material3")
+<<<<<<< HEAD
     implementation("androidx.compose.foundation:foundation")
+=======
+    implementation("androidx.compose.material:material-icons-extended")
+>>>>>>> c38fe5a (feat: Add settings screen and improve video playback)
 
     implementation("androidx.navigation:navigation-compose:2.7.7")
 
