@@ -3,27 +3,26 @@ package com.zeroplayer
 import android.app.PictureInPictureParams
 import android.os.Build
 import android.os.Bundle
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import com.zeroplayer.presentation.app.ZeroPlayerAppRoot
+import com.zeroplayer.presentation.theme.ZeroPlayerTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        installSplashScreen()
         super.onCreate(savedInstanceState)
 
         setContent {
-            MaterialTheme {
-                Surface {
-                    ZeroPlayerAppRoot(
-                        onEnterPip = { tryEnterPip() },
-                    )
-                }
+            ZeroPlayerTheme {
+                ZeroPlayerAppRoot(
+                    onEnterPip = { tryEnterPip() },
+                )
             }
         }
     }
