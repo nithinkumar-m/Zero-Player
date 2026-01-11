@@ -107,5 +107,4 @@ private fun FolderRow(
 }
 
 @OptIn(ExperimentalFoundationApi::class)
-private fun Modifier.animateItemPlacementCompat(): Modifier = this.animateItemPlacement()
-
+private fun Modifier.animateItemPlacementCompat(): Modifier = this
