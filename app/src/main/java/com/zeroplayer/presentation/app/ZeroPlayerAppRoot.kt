@@ -12,8 +12,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -40,8 +42,11 @@ import androidx.navigation.navArgument
 import com.zeroplayer.R
 import com.zeroplayer.presentation.folder.FolderVideosScreen
 import com.zeroplayer.presentation.folders.FoldersScreen
+import com.zeroplayer.presentation.folders.FoldersViewModel
 import com.zeroplayer.presentation.player.PlayerScreen
 import com.zeroplayer.presentation.settings.SettingsScreen
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 object Routes {
     const val Folders = "folders"
@@ -96,6 +101,12 @@ fun ZeroPlayerAppRoot(
             // Hide top bar on full-screen player for now.
             val showTopBar = !route.startsWith(Routes.Player)
             if (showTopBar) {
+                val foldersEntry = remember(navController) {
+                    runCatching { navController.getBackStackEntry(Routes.Folders) }.getOrNull()
+                }
+                val foldersVm = foldersEntry?.let { hiltViewModel<FoldersViewModel>(it) }
+                val foldersState = foldersVm?.uiState?.collectAsStateWithLifecycle()?.value
+
                 val canGoBack = navController.previousBackStackEntry != null &&
                     (route.startsWith(Routes.FolderVideos) || route == Routes.Settings)
 
@@ -116,6 +127,13 @@ fun ZeroPlayerAppRoot(
                     },
                     actions = {
                         if (route == Routes.Folders) {
+                            if (foldersState?.isRefreshing == true) {
+                                CircularProgressIndicator(modifier = Modifier.padding(12.dp))
+                            } else {
+                                IconButton(onClick = { foldersVm?.refresh() }) {
+                                    Icon(imageVector = Icons.Default.Refresh, contentDescription = "Refresh")
+                                }
+                            }
                             IconButton(onClick = { navController.navigate(Routes.Settings) }) {
                                 Icon(imageVector = Icons.Default.Settings, contentDescription = "Settings")
                             }
