@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">ZeroPlayer</string>
+    <string name="library_title">Library</string>
+    <string name="permission_needed_title">Storage permission required</string>
+    <string name="permission_needed_body">To list and play local videos, allow access to your media.</string>
+    <string name="grant_permission">Grant permission</string>
+    <string name="enter_pip">PiP</string>
+</resources>
+
