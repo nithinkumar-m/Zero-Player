@@ -28,13 +28,17 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.zeroplayer.R
-import com.zeroplayer.presentation.library.LibraryScreen
+import com.zeroplayer.presentation.folder.FolderVideosScreen
+import com.zeroplayer.presentation.folders.FoldersScreen
 import com.zeroplayer.presentation.player.PlayerScreen
 
 object Routes {
-    const val Library = "library"
+    const val Folders = "folders"
+    const val FolderVideos = "folderVideos"
     const val Player = "player"
     const val ArgUri = "uri"
+    const val ArgBucketId = "bucketId"
+    const val ArgFolderName = "folderName"
 }
 
 @Composable
@@ -75,10 +79,27 @@ fun ZeroPlayerAppRoot(
 
     NavHost(
         navController = navController,
-        startDestination = Routes.Library,
+        startDestination = Routes.Folders,
     ) {
-        composable(Routes.Library) {
-            LibraryScreen(
+        composable(Routes.Folders) {
+            FoldersScreen(
+                onOpenFolder = { bucketId, folderName ->
+                    navController.navigate(
+                        "${Routes.FolderVideos}/$bucketId/${android.net.Uri.encode(folderName)}",
+                    )
+                },
+            )
+        }
+
+        composable(
+            route = "${Routes.FolderVideos}/{${Routes.ArgBucketId}}/{${Routes.ArgFolderName}}",
+            arguments = listOf(
+                navArgument(Routes.ArgBucketId) { type = NavType.StringType },
+                navArgument(Routes.ArgFolderName) { type = NavType.StringType },
+            ),
+        ) {
+            FolderVideosScreen(
+                onBack = { navController.popBackStack() },
                 onOpenPlayer = { uriString ->
                     navController.navigate("${Routes.Player}/${android.net.Uri.encode(uriString)}")
                 },

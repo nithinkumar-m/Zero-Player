@@ -15,6 +15,8 @@ class MediaStoreVideoDataSource @Inject constructor(
         val projection = arrayOf(
             MediaStore.Video.Media._ID,
             MediaStore.Video.Media.DISPLAY_NAME,
+            MediaStore.Video.Media.BUCKET_ID,
+            MediaStore.Video.Media.BUCKET_DISPLAY_NAME,
             MediaStore.Video.Media.DURATION,
             MediaStore.Video.Media.SIZE,
             MediaStore.Video.Media.DATE_ADDED,
@@ -32,6 +34,8 @@ class MediaStoreVideoDataSource @Inject constructor(
         )?.use { cursor ->
             val idCol = cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID)
             val nameCol = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DISPLAY_NAME)
+            val bucketIdCol = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.BUCKET_ID)
+            val bucketNameCol = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.BUCKET_DISPLAY_NAME)
             val durationCol = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION)
             val sizeCol = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.SIZE)
             val dateAddedCol = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATE_ADDED)
@@ -39,6 +43,8 @@ class MediaStoreVideoDataSource @Inject constructor(
             while (cursor.moveToNext()) {
                 val id = cursor.getLong(idCol)
                 val title = cursor.getString(nameCol).orEmpty()
+                val bucketId = cursor.getLong(bucketIdCol)
+                val bucketName = cursor.getString(bucketNameCol).orEmpty()
                 val durationMs = cursor.getLong(durationCol)
                 val sizeBytes = cursor.getLong(sizeCol)
                 val dateAdded = cursor.getLong(dateAddedCol)
@@ -49,6 +55,8 @@ class MediaStoreVideoDataSource @Inject constructor(
                     id = id,
                     title = title,
                     uriString = contentUri.toString(),
+                    bucketId = bucketId,
+                    bucketName = bucketName,
                     durationMs = durationMs,
                     sizeBytes = sizeBytes,
                     dateAddedEpochSeconds = dateAdded,

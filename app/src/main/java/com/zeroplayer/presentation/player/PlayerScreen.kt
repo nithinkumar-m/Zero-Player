@@ -1,6 +1,8 @@
 package com.zeroplayer.presentation.player
 
+import android.app.Activity
 import android.net.Uri
+import android.content.pm.ActivityInfo
 import android.view.ViewGroup
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Arrangement
@@ -20,6 +22,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
+import androidx.media3.common.VideoSize
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 import com.zeroplayer.R
@@ -31,6 +35,7 @@ fun PlayerScreen(
     onEnterPip: () -> Unit,
 ) {
     val context = LocalContext.current
+    val activity = context as? Activity
     val uri = remember(uriString) { Uri.parse(uriString) }
 
     val player = remember(uriString) {
@@ -41,8 +46,25 @@ fun PlayerScreen(
         }
     }
 
-    DisposableEffect(player) {
+    DisposableEffect(player, activity) {
+        val listener = object : Player.Listener {
+            override fun onVideoSizeChanged(videoSize: VideoSize) {
+                val w = videoSize.width
+                val h = videoSize.height
+                if (w <= 0 || h <= 0) return
+
+                // Requirement:
+                // - If the video is landscape (including 16:9), lock landscape.
+                // - If the video is portrait, lock portrait.
+                activity?.requestedOrientation =
+                    if (w >= h) ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+                    else ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT
+            }
+        }
+        player.addListener(listener)
         onDispose {
+            player.removeListener(listener)
+            activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
             player.release()
         }
     }
