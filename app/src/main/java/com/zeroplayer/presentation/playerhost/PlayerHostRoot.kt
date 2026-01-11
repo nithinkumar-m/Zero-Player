@@ -16,7 +16,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,19 +34,16 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun PlayerHostRoot(
-    uriString: String,
     onBack: () -> Unit,
     onEnterPip: () -> Unit,
     viewModel: PlayerHostViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
     val activity = context as? Activity
-    val playbackState by viewModel.playback.state.collectAsStateWithLifecycle()
+    val playbackState by viewModel.playbackState.collectAsStateWithLifecycle()
     val settings by viewModel.settings.collectAsStateWithLifecycle()
-
-    LaunchedEffect(uriString) {
-        viewModel.start(uriString)
-    }
+    // Keep player reference stable across recompositions (avoid interop jank).
+    val player = remember(viewModel) { viewModel.player }
 
     // Lock orientation based on video aspect ratio.
     DisposableEffect(activity, playbackState.videoWidth, playbackState.videoHeight) {
@@ -83,7 +79,7 @@ fun PlayerHostRoot(
                             val seekMs = settings.doubleTapSeekMs
                             val isLeft = offset.x < (widthPx / 2f)
                             val delta = if (isLeft) -seekMs else seekMs
-                            viewModel.seekBy(delta)
+                            viewModel.fastSeekBy(delta)
                             seekToast.value = if (isLeft) "-${seekMs / 1000}s" else "+${seekMs / 1000}s"
                         },
                     )
@@ -97,11 +93,11 @@ fun PlayerHostRoot(
                             ViewGroup.LayoutParams.MATCH_PARENT,
                             ViewGroup.LayoutParams.MATCH_PARENT,
                         )
-                        player = viewModel.playback.player
+                        player = player
                         useController = true
                     }
                 },
-                update = { it.player = viewModel.playback.player },
+                update = { it.player = player },
             )
 
             val toast = seekToast.value

@@ -7,27 +7,42 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
+import androidx.activity.viewModels
 import com.zeroplayer.presentation.playerhost.PlayerHostRoot
+import com.zeroplayer.presentation.playerhost.PlayerHostViewModel
 import com.zeroplayer.presentation.theme.ZeroPlayerTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class PlayerActivity : ComponentActivity() {
+    private val viewModel: PlayerHostViewModel by viewModels()
+    private var uriString: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val uriString = intent?.getStringExtra(EXTRA_URI).orEmpty()
+        uriString = intent?.getStringExtra(EXTRA_URI).orEmpty()
 
         setContent {
             ZeroPlayerTheme {
                 PlayerHostRoot(
-                    uriString = uriString,
                     onBack = { finish() },
                     onEnterPip = { tryEnterPip() },
+                    viewModel = viewModel,
                 )
             }
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        // Start/resume playback once per Activity start, not from recompositions.
+        viewModel.onStart(uriString)
+    }
+
+    override fun onStop() {
+        viewModel.onStop(isFinishing)
+        super.onStop()
     }
 
     private fun tryEnterPip() {
