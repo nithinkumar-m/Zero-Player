@@ -1,9 +1,9 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
-    <style name="Theme.ZeroPlayer.Splash" parent="Theme.SplashScreen">
+    <style name="Theme.RollDice.Splash" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">?attr/colorSurface</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher</item>
-        <item name="postSplashScreenTheme">@style/Theme.ZeroPlayer</item>
+        <item name="postSplashScreenTheme">@style/Theme.RollDice</item>
     </style>
 
 </resources>
