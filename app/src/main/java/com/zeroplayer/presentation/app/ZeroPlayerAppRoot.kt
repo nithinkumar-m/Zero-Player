@@ -47,6 +47,7 @@ import com.zeroplayer.presentation.player.PlayerScreen
 import com.zeroplayer.presentation.settings.SettingsScreen
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.material3.ExperimentalMaterial3Api
 
 object Routes {
     const val Folders = "folders"
@@ -58,6 +59,7 @@ object Routes {
     const val ArgFolderName = "folderName"
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ZeroPlayerAppRoot(
     onEnterPip: () -> Unit,
@@ -214,4 +216,3 @@ private fun PermissionGate(
         }
     }
 }
-
