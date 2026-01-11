@@ -5,5 +5,6 @@ import kotlinx.coroutines.flow.Flow
 
 interface VideoRepository {
     fun observeDeviceVideos(): Flow<List<Video>>
+    suspend fun refreshDeviceVideos()
 }
 

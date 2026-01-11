@@ -1,6 +1,9 @@
-package com.zeroplayer.presentation.library
+package com.zeroplayer.presentation.folders
 
-import android.text.format.Formatter
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -14,32 +17,26 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.zeroplayer.R
-import com.zeroplayer.domain.model.Video
-import java.util.concurrent.TimeUnit
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.zeroplayer.domain.model.VideoFolder
 
 @Composable
-fun LibraryScreen(
-    onOpenPlayer: (uriString: String) -> Unit,
-    viewModel: LibraryViewModel = hiltViewModel(),
+fun FoldersScreen(
+    onOpenFolder: (bucketId: Long, folderName: String) -> Unit,
+    viewModel: FoldersViewModel = hiltViewModel(),
 ) {
-    val state by viewModel.uiState.collectAsState()
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
 
-    Column(
-        modifier = Modifier.fillMaxSize(),
-    ) {
+    Column(modifier = Modifier.fillMaxSize()) {
         Text(
             modifier = Modifier.padding(16.dp),
-            text = stringResource(id = R.string.library_title),
+            text = "Folders",
             style = MaterialTheme.typography.titleLarge,
         )
 
@@ -52,12 +49,23 @@ fun LibraryScreen(
                 CircularProgressIndicator()
             }
         } else {
-            LazyColumn(modifier = Modifier.fillMaxSize()) {
-                items(state.videos, key = { it.id }) { video ->
-                    VideoRow(
-                        video = video,
-                        onClick = { onOpenPlayer(video.uriString) },
-                    )
+            AnimatedVisibility(
+                visible = true,
+                enter = if (state.enableAnimations) fadeIn() else fadeIn(initialAlpha = 1f),
+                exit = if (state.enableAnimations) fadeOut() else fadeOut(targetAlpha = 0f),
+            ) {
+                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                    items(
+                        items = state.folders,
+                        key = { it.bucketId },
+                        contentType = { "folder" },
+                    ) { folder ->
+                        FolderRow(
+                            folder = folder,
+                            onClick = { onOpenFolder(folder.bucketId, folder.name) },
+                            enableAnimations = state.enableAnimations,
+                        )
+                    }
                 }
             }
         }
@@ -65,13 +73,14 @@ fun LibraryScreen(
 }
 
 @Composable
-private fun VideoRow(
-    video: Video,
+private fun FolderRow(
+    folder: VideoFolder,
     onClick: () -> Unit,
+    enableAnimations: Boolean,
 ) {
-    val context = LocalContext.current
     Row(
         modifier = Modifier
+            .then(if (enableAnimations) Modifier.animateItemPlacementCompat() else Modifier)
             .fillMaxWidth()
             .clickable(onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 12.dp),
@@ -83,13 +92,13 @@ private fun VideoRow(
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             Text(
-                text = video.title.ifBlank { "Untitled" },
+                text = folder.name,
                 style = MaterialTheme.typography.titleMedium,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
             Text(
-                text = "${formatDuration(video.durationMs)} • ${Formatter.formatShortFileSize(context, video.sizeBytes)}",
+                text = "${folder.videoCount} videos",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -97,13 +106,5 @@ private fun VideoRow(
     }
 }
 
-private fun formatDuration(durationMs: Long): String {
-    if (durationMs <= 0) return "—"
-    val totalSeconds = TimeUnit.MILLISECONDS.toSeconds(durationMs)
-    val hours = totalSeconds / 3600
-    val minutes = (totalSeconds % 3600) / 60
-    val seconds = totalSeconds % 60
-    return if (hours > 0) "%d:%02d:%02d".format(hours, minutes, seconds)
-    else "%d:%02d".format(minutes, seconds)
-}
-
+@OptIn(ExperimentalFoundationApi::class)
+private fun Modifier.animateItemPlacementCompat(): Modifier = this
