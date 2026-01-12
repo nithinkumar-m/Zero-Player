@@ -16,6 +16,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,7 +44,7 @@ fun PlayerHostRoot(
     val playbackState by viewModel.playbackState.collectAsStateWithLifecycle()
     val settings by viewModel.settings.collectAsStateWithLifecycle()
     // Keep player reference stable across recompositions (avoid interop jank).
-    val player = remember(viewModel) { viewModel.player }
+    val exoPlayer = remember(viewModel) { viewModel.player }
 
     // Lock orientation based on video aspect ratio.
     DisposableEffect(activity, playbackState.videoWidth, playbackState.videoHeight) {
@@ -93,11 +94,11 @@ fun PlayerHostRoot(
                             ViewGroup.LayoutParams.MATCH_PARENT,
                             ViewGroup.LayoutParams.MATCH_PARENT,
                         )
-                        player = player
+                        setPlayer(exoPlayer)
                         useController = true
                     }
                 },
-                update = { it.player = player },
+                update = { it.setPlayer(exoPlayer) },
             )
 
             val toast = seekToast.value
@@ -134,4 +135,3 @@ fun PlayerHostRoot(
         }
     }
 }
-

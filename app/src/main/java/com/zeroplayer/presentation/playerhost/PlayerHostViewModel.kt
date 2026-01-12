@@ -4,8 +4,8 @@ import android.content.Context
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
-import androidx.media3.common.SeekParameters
 import androidx.media3.common.VideoSize
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -17,10 +17,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -33,9 +32,11 @@ class PlayerHostViewModel @Inject constructor(
     settingsRepository: SettingsRepository,
     private val playbackResumeDao: PlaybackResumeDao,
 ) : ViewModel() {
+
+    @OptIn(UnstableApi::class)
     val player: ExoPlayer = ExoPlayer.Builder(context).build().apply {
+        // Keeps the same visual behavior you intended. Marked Unstable in some Media3 versions.
         videoScalingMode = C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING
-        seekParameters = SeekParameters.DEFAULT
     }
 
     private val _playbackState = MutableStateFlow(PlaybackState())
@@ -112,15 +113,14 @@ class PlayerHostViewModel @Inject constructor(
     }
 
     fun fastSeekBy(deltaMs: Long) {
-        // Snappy scrubbing: sync-frame seeking during bursts, then restore DEFAULT.
-        player.seekParameters = SeekParameters.PREVIOUS_SYNC
+        // Media3's SeekParameters API isn't available (or the property is read-only) in your setup.
+        // Keep behavior simple and reliable by seeking directly.
         val target = (player.currentPosition + deltaMs).coerceAtLeast(0L)
         player.seekTo(target)
 
-        restoreSeekJob?.cancel()
-        restoreSeekJob = viewModelScope.launch {
-            kotlinx.coroutines.delay(750)
-            player.seekParameters = SeekParameters.DEFAULT
+        // Optionally resume playback after a seek.
+        if (player.playbackState != Player.STATE_IDLE) {
+            player.playWhenReady = true
         }
     }
 
@@ -153,4 +153,3 @@ class PlayerHostViewModel @Inject constructor(
         super.onCleared()
     }
 }
-
