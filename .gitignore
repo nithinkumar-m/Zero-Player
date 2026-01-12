@@ -1,17 +1,22 @@
 # Gradle files
 .gradle/
 build/
+**/build/
 
 # Local configuration file (sdk path, etc)
 local.properties
 
 # Log/OS Files
 *.log
+.DS_Store
+Thumbs.db
 
 # Android Studio generated files and folders
 captures/
 .externalNativeBuild/
 .cxx/
+**/.idea/
+**/*.iml
 *.aab
 *.apk
 output-metadata.json
@@ -22,6 +27,13 @@ output-metadata.json
 misc.xml
 deploymentTargetDropDown.xml
 render.experimental.xml
+
+# Kotlin
+.kotlin/
+**/.kotlin/
+
+# NDK / CMake
+**/obj/
 
 # Keystore files
 *.jks

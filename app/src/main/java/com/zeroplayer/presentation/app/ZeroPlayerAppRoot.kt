@@ -9,13 +9,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -40,21 +37,16 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.zeroplayer.R
+import com.zeroplayer.player.PlayerActivity
 import com.zeroplayer.presentation.folder.FolderVideosScreen
 import com.zeroplayer.presentation.folders.FoldersScreen
-import com.zeroplayer.presentation.folders.FoldersViewModel
-import com.zeroplayer.presentation.player.PlayerScreen
 import com.zeroplayer.presentation.settings.SettingsScreen
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.material3.ExperimentalMaterial3Api
 
 object Routes {
     const val Folders = "folders"
     const val FolderVideos = "folderVideos"
-    const val Player = "player"
     const val Settings = "settings"
-    const val ArgUri = "uri"
     const val ArgBucketId = "bucketId"
     const val ArgFolderName = "folderName"
 }
@@ -62,7 +54,6 @@ object Routes {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ZeroPlayerAppRoot(
-    onEnterPip: () -> Unit,
 ) {
     val navController = rememberNavController()
     val context = LocalContext.current
@@ -100,15 +91,7 @@ fun ZeroPlayerAppRoot(
 
     Scaffold(
         topBar = {
-            // Hide top bar on full-screen player for now.
-            val showTopBar = !route.startsWith(Routes.Player)
-            if (showTopBar) {
-                val foldersEntry = remember(navController) {
-                    runCatching { navController.getBackStackEntry(Routes.Folders) }.getOrNull()
-                }
-                val foldersVm = foldersEntry?.let { hiltViewModel<FoldersViewModel>(it) }
-                val foldersState = foldersVm?.uiState?.collectAsStateWithLifecycle()?.value
-
+            run {
                 val canGoBack = navController.previousBackStackEntry != null &&
                     (route.startsWith(Routes.FolderVideos) || route == Routes.Settings)
 
@@ -129,13 +112,6 @@ fun ZeroPlayerAppRoot(
                     },
                     actions = {
                         if (route == Routes.Folders) {
-                            if (foldersState?.isRefreshing == true) {
-                                CircularProgressIndicator(modifier = Modifier.padding(12.dp))
-                            } else {
-                                IconButton(onClick = { foldersVm?.refresh() }) {
-                                    Icon(imageVector = Icons.Default.Refresh, contentDescription = "Refresh")
-                                }
-                            }
                             IconButton(onClick = { navController.navigate(Routes.Settings) }) {
                                 Icon(imageVector = Icons.Default.Settings, contentDescription = "Settings")
                             }
@@ -174,20 +150,8 @@ fun ZeroPlayerAppRoot(
                 FolderVideosScreen(
                     onBack = { navController.popBackStack() },
                     onOpenPlayer = { uriString ->
-                        navController.navigate("${Routes.Player}/${android.net.Uri.encode(uriString)}")
+                        context.startActivity(PlayerActivity.intent(context, uriString))
                     },
-                )
-            }
-
-            composable(
-                route = "${Routes.Player}/{${Routes.ArgUri}}",
-                arguments = listOf(navArgument(Routes.ArgUri) { type = NavType.StringType }),
-            ) { backStackEntry ->
-                val uriString = backStackEntry.arguments?.getString(Routes.ArgUri).orEmpty()
-                PlayerScreen(
-                    uriString = android.net.Uri.decode(uriString),
-                    onBack = { navController.popBackStack() },
-                    onEnterPip = onEnterPip,
                 )
             }
         }

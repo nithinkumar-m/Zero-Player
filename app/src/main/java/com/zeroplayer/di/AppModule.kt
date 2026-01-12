@@ -2,6 +2,9 @@ package com.zeroplayer.di
 
 import android.content.ContentResolver
 import android.content.Context
+import androidx.room.Room
+import com.zeroplayer.data.db.PlaybackResumeDao
+import com.zeroplayer.data.db.ZeroPlayerDatabase
 import com.zeroplayer.data.repository.DeviceVideoRepository
 import com.zeroplayer.data.settings.DataStoreSettingsRepository
 import com.zeroplayer.domain.repository.SettingsRepository
@@ -44,6 +47,20 @@ abstract class AppModule {
         @ApplicationScope
         fun provideApplicationScope(): CoroutineScope =
             CoroutineScope(SupervisorJob() + Dispatchers.Default)
+
+        @Provides
+        @Singleton
+        fun provideDatabase(
+            @ApplicationContext context: Context,
+        ): ZeroPlayerDatabase =
+            Room.databaseBuilder(context, ZeroPlayerDatabase::class.java, "zeroplayer.db")
+                .fallbackToDestructiveMigration()
+                .build()
+
+        @Provides
+        fun providePlaybackResumeDao(
+            db: ZeroPlayerDatabase,
+        ): PlaybackResumeDao = db.playbackResumeDao()
     }
 }
 
