@@ -1,0 +1,113 @@
+# Deeplink and Branch Configuration
+
+This document outlines the deeplink schemes and host URLs used in the application for various flavors and build types.
+
+## `deeplinkSchemes`
+
+| Flavor | Debug | Stage | Release |
+| :--- | :--- | :--- | :--- |
+| **tlc** | `tlc-go-app` | `tlc-go-app` | `tlc-go-app` |
+| **ahc** | `ahc-go-app` | `ahc-go-app` | `ahc-go-app` |
+| **apl** | `apl-go-app` | `apl-go-app` | `apl-go-app` |
+| **cook** | `cook-go-app` | `cook-go-app` | `cook-go-app` |
+| **dam** | `dam-go-app` | `dam-go-app` | `dam-go-app` |
+| **des** | `des-go-app` | `des-go-app` | `des-go-app` |
+| **dfc** | `dfc-go-app` | `dfc-go-app` | `dfc-go-app` |
+| **dlf** | `dlf-go-app` | `dlf-go-app` | `dlf-go-app` |
+| **dsc** | `discovery-go-app` | `discovery-go-app` | `discovery-go-app` |
+| **dsf** | `dsf-go-app` | `dsf-go-app` | `dsf-go-app` |
+| **food** | `food-go-app` | `food-go-app` | `food-go-app` |
+| **hgtv** | `hgtv-go-app` | `hgtv-go-app` | `hgtv-go-app` |
+| **ids** | `ids-go-app` | `ids-go-app` | `ids-go-app` |
+| **own** | `own-go-app` | `own-go-app` | `own-go-app` |
+| **sci** | `sci-go-app` | `sci-go-app` | `sci-go-app` |
+| **trav** | `trav-go-app` | `trav-go-app` | `trav-go-app` |
+| **vel** | `vel-go-app` | `vel-go-app` | `vel-go-app` |
+
+## `deeplinkHostNames`
+
+| Flavor | Debug | Stage | Release |
+| :--- | :--- | :--- | :--- |
+| **tlc** | `test-tlc.atve.hashbuild.disco-api.com` | `uat.go.tlc.com` | `go.tlc.com` |
+| **ahc** | `uat.ahctv.com` | `uat.ahctv.com` | `www.ahctv.com` |
+| **apl** | `uat.animalplanet.com` | `uat.animalplanet.com` | `www.animalplanet.com` |
+| **cook**| `uat.watch.cookingchanneltv.com` | `uat.watch.cookingchanneltv.com` | `watch.cookingchanneltv.com` |
+| **dam** | `uat.destinationamerica.com` | `uat.destinationamerica.com` | `www.destinationamerica.com` |
+| **des** | `www.discoveryenespanol.com` | `www.discoveryenespanol.com` | `www.discoveryenespanol.com` |
+| **dfc** | `www.discoveryfamilychannel.com` | `www.discoveryfamilychannel.com` | `www.discoveryfamilychannel.com` |
+| **dlf** | `uat.discoverylife.com` | `uat.discoverylife.com` | `www.discoverylife.com` |
+| **dsc** | `uat.go.discovery.com` | `uat.go.discovery.com` | `go.discovery.com` |
+| **dsf** | `discoveryfamilia.com` | `discoveryfamilia.com` | `discoveryfamilia.com` |
+| **food**| `uat.watch.foodnetwork.com` | `uat.watch.foodnetwork.com` | `watch.foodnetwork.com` |
+| **hgtv**| `uat.watch.hgtv.com` | `uat.watch.hgtv.com` | `watch.hgtv.com` |
+| **ids** | `uat.investigationdiscovery.com` | `uat.investigationdiscovery.com` | `www.investigationdiscovery.com` |
+| **own** | `www.oprah.com` | `www.oprah.com` | `www.oprah.com` |
+| **sci** | `uat.sciencechannel.com` | `uat.sciencechannel.com` | `www.sciencechannel.com` |
+| **trav**| `uat.travelchannel.com` | `uat.travelchannel.com` | `travelchannel.com` |
+| **vel** | `uat.watch.motortrend.com` | `uat.watch.motortrend.com` | `watch.motortrend.com` |
+
+## `deeplinkShortHostNames`
+
+| Flavor | Debug | Stage | Release |
+| :--- | :--- | :--- | :--- |
+| **own** | `watchown.tv` | `watchown.tv` | `watchown.tv` |
+
+## `branchHostLinks`
+
+| Flavor | Debug | Stage | Release |
+| :--- | :--- | :--- | :--- |
+| **tlc** | `tlcgo.test-app.link` | `tlcgo.test-app.link` | `links.tlc.com` |
+| **ahc** | `ahc.test-app.link` | `ahc.test-app.link` | `links.ahctv.com` |
+| **apl** | `apl.test-app.link` | `apl.test-app.link` | `links.animalplanet.com` |
+| **cook**| `cookingchannel.test-app.link` | `cookingchannel.test-app.link` | `links.cookingchanneltv.com` |
+| **dam** | `dam.test-app.link` | `dam.test-app.link` | `links.destinationamerica.com` |
+| **dlf** | `dlf.test-app.link` | `dlf.test-app.link` | `links.discoverylife.com` |
+| **dsc** | `dscgo.test-app.link` | `dscgo.test-app.link` | `links.discovery.com` |
+| **dsf** | `wenf9.test-app.link` | `wenf9.test-app.link` | `wenf9.app.link` |
+| **food**| `foodgo.test-app.link` | `foodgo.test-app.link` | `links.foodnetwork.com` |
+| **hgtv**| `hgtvgo.test-app.link` | `hgtvgo.test-app.link` | `links.hgtv.com` |
+| **ids** | `idsgo.test-app.link` | `idsgo.test-app.link` | `links.investigationdiscovery.com` |
+| **own** | `watchown.test-app.link` | `watchown.test-app.link` | `links.own.tv` |
+| **sci** | `scigo.test-app.link` | `scigo.test-app.link` | `links.sciencechannel.com` |
+| **trav**| `travelchannel.test-app.link` | `travelchannel.test-app.link` | `links.travelchannel.com` |
+| **vel** | `velgo.test-app.link` | `velgo.test-app.link` | `links.motortrend.com` |
+
+## `branchHostAlternateLinks`
+
+| Flavor | Debug | Stage | Release |
+| :--- | :--- | :--- | :--- |
+| **tlc** | `tlcgo-alternate.test-app.link` | `tlcgo-alternate.test-app.link` | `tlcgo-alternate.app.link` |
+| **ahc** | `ahc-alternate.test-app.link` | `ahc-alternate.test-app.link` | `ahc-alternate.app.link` |
+| **apl** | `apl-alternate.test-app.link` | `apl-alternate.test-app.link` | `apl-alternate.app.link` |
+| **cook**| `cookingchannel-alternate.test-app.link` | `cookingchannel-alternate.test-app.link` | `cookingchannel-alternate.app.link` |
+| **dam** | `dam-alternate.test-app.link` | `dam-alternate.test-app.link` | `dam-alternate.app.link` |
+| **dlf** | `dlf-alternate.test-app.link` | `dlf-alternate.test-app.link` | `dlf-alternate.app.link` |
+| **dsc** | `dscgo-alternate.test-app.link` | `dscgo-alternate.test-app.link` | `dscgo-alternate.app.link` |
+| **dsf** | `wenf9-alternate.test-app.link` | `wenf9-alternate.test-app.link` | `wenf9-alternate.app.link` |
+| **food**| `foodgo-alternate.test-app.link` | `foodgo-alternate.test-app.link` | `foodgo-alternate.app.link` |
+| **hgtv**| `hgtvgo-alternate.test-app.link` | `hgtvgo-alternate.test-app.link` | `hgtvgo-alternate.app.link` |
+| **ids** | `idsgo-alternate.test-app.link` | `idsgo-alternate.test-app.link` | `idsgo-alternate.app.link` |
+| **own** | `watchown-alternate.test-app.link` | `watchown-alternate.test-app.link` | `watchown-alternate.app.link` |
+| **sci** | `scigo-alternate.test-app.link` | `scigo-alternate.test-app.link` | `scigo-alternate.app.link` |
+| **trav**| `travelchannel-alternate.test-app.link` | `travelchannel-alternate.test-app.link` | `travelchannel-alternate.app.link` |
+| **vel** | `velgo-alternate.test-app.link` | `velgo-alternate.test-app.link` | `velgo-alternate.app.link` |
+
+## `branchHostOriginalLinks`
+
+| Flavor | Debug | Stage | Release |
+| :--- | :--- | :--- | :--- |
+| **tlc** | `tlcgo.test-app.link` | `tlcgo.test-app.link` | `tlcgo.app.link` |
+| **ahc** | `ahc.test-app.link` | `ahc.test-app.link` | `ahc.app.link` |
+| **apl** | `apl.test-app.link` | `apl.test-app.link` | `apl.app.link` |
+| **cook**| `cookingchannel.test-app.link` | `cookingchannel.test-app.link` | `cookingchannel.app.link` |
+| **dam** | `dam.test-app.link` | `dam.test-app.link` | `dam.app.link` |
+| **dlf** | `dlf.test-app.link` | `dlf.test-app.link` | `dlf.app.link` |
+| **dsc** | `dscgo.test-app.link` | `dscgo.test-app.link` | `dscgo.app.link` |
+| **dsf** | `wenf9.test-app.link` | `wenf9.test-app.link` | `wenf9.app.link` |
+| **food**| `foodgo.test-app.link` | `foodgo.test-app.link` | `foodgo.app.link` |
+| **hgtv**| `hgtvgo.test-app.link` | `hgtvgo.test-app.link` | `hgtvgo.app.link` |
+| **ids** | `idsgo.test-app.link` | `idsgo.test-app.link` | `idsgo.app.link` |
+| **own** | `watchown.test-app.link` | `watchown.test-app.link` | `watchown.app.link` |
+| **sci** | `scigo.test-app.link` | `scigo.test-app.link` | `scigo.app.link` |
+| **trav**| `travelchannel.test-app.link` | `travelchannel.test-app.link` | `travelchannel.app.link` |
+| **vel** | `velgo.test-app.link` | `velgo.test-app.link` | `velgo.app.link` |
